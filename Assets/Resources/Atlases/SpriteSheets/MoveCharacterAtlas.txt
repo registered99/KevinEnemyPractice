@@ -1,0 +1,20 @@
+{"frames": {
+
+"theTriangles.png":
+{
+	"frame": {"x":2,"y":2,"w":400,"h":256},
+	"rotated": false,
+	"trimmed": false,
+	"spriteSourceSize": {"x":0,"y":0,"w":400,"h":256},
+	"sourceSize": {"w":400,"h":256}
+}},
+"meta": {
+	"app": "http://www.codeandweb.com/texturepacker ",
+	"version": "1.0",
+	"image": "MoveCharacterAtlas.png",
+	"format": "RGBA8888",
+	"size": {"w":512,"h":512},
+	"scale": "1",
+	"smartupdate": "$TexturePacker:SmartUpdate:a02a432b23dc66b144147a3ff84e391e:1/1$"
+}
+}
