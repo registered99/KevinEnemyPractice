@@ -3,7 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System;
 
-public class Gamepage :  MonoBehaviour
+public class Gamepage : FContainer, FMultiTouchableInterface
 {
 	private FSprite _background;
 	private FSprite _naner;
@@ -29,26 +29,21 @@ public class Gamepage :  MonoBehaviour
 	private float speedX = 0.0f;
 	private float frameCount = 0;
 	
-	public void Start()
+	public Gamepage()
 	{
-		FutileParams fparams = new FutileParams(true, true, false, false);
-		fparams.AddResolutionLevel(480.0f, 1.0f, 1.0f, "_Scale1");
 		
-		fparams.origin = new Vector2(0.5f, 0.5f);
+		EnableMultiTouch ();
 		
-		Futile.instance.Init (fparams);
-		
-		Futile.atlasManager.LoadAtlas("Atlases/BananaLargeAtlas");
-		Futile.atlasManager.LoadAtlas("Atlases/BananaGameAtlas");
+		ListenForUpdate (HandleUpdate);
 		
 		_holder = new FContainer();
-		
+
 		_background = new FSprite("JungleClearBG");
 		_naner = new FSprite("Banana");
 		_naner2 = new FSprite("Banana");
 		//_monkey = new FSprite("Monkey_0");
 		
-		Futile.stage.AddChild(_background);
+		AddChild(_background);
 		
 		_naner.x = 0.0f;
 		_naner.y = -23.0f;
@@ -56,73 +51,18 @@ public class Gamepage :  MonoBehaviour
 		_naner2.y = 23.0f;
 		_naner2.rotation = 180.0f;
 		
-		_holder.AddChild(_naner2);
-		_holder.AddChild(_naner);
-		//_holder.AddChild(_monkey);
-		_holder.scale = 0.5f;
+		AddChild(_naner2);
+		AddChild(_naner);
+		
 		Futile.stage.AddChild(_holder);
-		
-		_shootbutton = new FButton("CloseButton_normal","CloseButton_over");
-		_shootbutton.y = 0.0f;
-		_shootbutton.x = Futile.screen.halfWidth - 12.5f;
-		
-		_shootbutton.scale = 0.5f;
-		
-		Futile.stage.AddChild(_shootbutton);
-		
-		
-		_upbutton = new FButton("CloseButton_normal","CloseButton_over");
-		_downbutton = new FButton("CloseButton_normal","CloseButton_over");
-		_leftbutton = new FButton("CloseButton_normal","CloseButton_over");
-		_rightbutton = new FButton("CloseButton_normal","CloseButton_over");
-		
-		_upbutton.x = 0.0f;
-		_upbutton.y = 50.0f;
-		_downbutton.x = 0.0f;
-		_downbutton.y = -50.0f;
-		_rightbutton.x = 50.0f;
-		_rightbutton.y = 0.0f;
-		_leftbutton.x = -50.0f;
-		_leftbutton.y = 0.0f;
-		
-		_movepad = new FContainer();
-		
-		_movepad.AddChild(_upbutton);
-		_movepad.AddChild(_downbutton);
-		_movepad.AddChild(_rightbutton);
-		_movepad.AddChild(_leftbutton);
-		
-		_movepad.x = -Futile.screen.halfWidth + 37;
-		_movepad.y = 0.0f;
-		_movepad.scale = 0.5f;
-		
-		Futile.stage.AddChild(_movepad);
-		
-		
-		
-		_shootbutton.SignalRelease += HandleShoot;
-		_upbutton.SignalPress += HandleUp;
-		_downbutton.SignalPress += HandleDown;
-		_leftbutton.SignalPress += HandleLeft;
-		_rightbutton.SignalPress += HandleRight;
-		
-		_upbutton.SignalRelease += HandleUpRelease;
-		_downbutton.SignalRelease += HandleDownRelease;
-		_rightbutton.SignalRelease += HandleRightRelease;
-		_leftbutton.SignalRelease += HandleLeftRelease;
-	
-		
 	}
 
 	
-	public void Update()
+	public void HandleUpdate()
 	{
-		_holder.y += speedY;
-		_holder.x += speedX;
 		frameCount += 1;
 		if(frameCount%60 == 0)
 		{
-			//Debug.Log ("Should spawn");
 			_enemy = new Enemy();
 			Futile.stage.AddChild(_enemy);
 			_enemies.Add(_enemy);
@@ -131,7 +71,7 @@ public class Gamepage :  MonoBehaviour
 			
 		for(int b = _shots.Count - 1; b>=0; b--)
 		{
-			_shots[b].Update();
+			_shots[b].Update(); // Shouldn't call update like this, i think
 			Shot shotted = _shots[b];
 			if(shotted.x > Futile.screen.halfWidth || shotted.x < -Futile.screen.halfWidth)
 			{
@@ -189,57 +129,39 @@ public class Gamepage :  MonoBehaviour
 		
 	}
 	
-	public void HandleShoot(FButton button)
+	public void HandleShoot()
 	{
 		_shot = new Shot();
 		_shot.x = _holder.x + 10;
 		_shot.y = _holder.y;
-		Futile.stage.AddChild(_shot);
+		AddChild(_shot);
 		_shots.Add(_shot);
 	
 	}
 	
-	public void HandleUp(FButton button)
+	public void HandleMultiTouch(FTouch[] touches)
 	{
-		speedY = 1f;
+		if (touches.Length > 0){
+			MoveCharacter(touches[0].position);
+		}
+		if (touches.Length > 1){
+			HandleShoot();
+		}
 	}
 	
-	public void HandleDown(FButton button)
+	private void MoveCharacter(Vector2 position)
 	{
-		speedY = -1f;
-	}
-	
-	public void HandleRight(FButton button)
-	{
-		speedX = 1f;
-	}
-	
-	public void HandleLeft(FButton button)
-	{
-		speedX = -1f;
+		_naner.x = position.x;
+		_naner.y = position.y-23.0f;
+		_naner2.x = position.x;
+		_naner2.y = position.y+23.0f;
+		_holder.x = position.x;
+		_holder.y = position.y;
+		
 	}
 	
 	
 	
-	public void HandleUpRelease(FButton button)
-	{
-		speedY = 0f;
-	}
-	
-	public void HandleDownRelease(FButton button)
-	{
-		speedY = 0f;
-	}
-	
-	public void HandleRightRelease(FButton button)
-	{
-		speedX = 0f;
-	}
-	
-	public void HandleLeftRelease(FButton button)
-	{
-		speedX = 0f;
-	}
 	
 	
 }
